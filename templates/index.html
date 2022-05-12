@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Register System{% endblock %}
+
+{% block content %}
+<!-- ... HTML existente ... -->
+<h1>Hola</h1>
+<button onclick="rel()">Pincha</button>
+<div class="container">
+<div id="pyramid"></div>
+</div>
+<script>
+  // data must be in a format with age, male, and female in each object
+  var exampleData = [{ age: '0-9', male: 10, female: 12 }, { age: '10-19', male: 14, female: 15 }, { age: '20-29', male: 15, female: 18 }, { age: '30-39', male: 18, female: 18 }, { age: '40-49', male: 21, female: 22 }, {age: '50-59', male: 19, female: 24 }, { age: '60-69', male: 15, female: 14 }, {age: '70-79', male: 8, female: 10 }, { age: '80-89', male: 4, female: 5 }, {age: '90+', male: 2, female: 3 }];
+  var exampleData2 = [{ age: '0-10', male: 10, female: 12 }, { age: '10-19', male: 14, female: 15 }, { age: '20-29', male: 15, female: 18 }, { age: '30-39', male: 18, female: 18 }, { age: '40-49', male: 21, female: 22 }, {age: '50-59', male: 19, female: 24 }, { age: '60-69', male: 15, female: 14 }, {age: '70-79', male: 8, female: 10 }, { age: '80-89', male: 4, female: 5 }, {age: '90+', male: 2, female: 3 }];
+  var vacio = [{}];
+  var options = {
+    height: 400,
+    width: 600,
+    style: {
+      leftBarColor: "#229922",
+      rightBarColor: "#992222"
+    }
+  }
+  var dibujo = pyramidBuilder(exampleData, '#pyramid', options);
+  function rel(){
+    $("#pyramid").remove();
+    $(".container").append('<div id="pyramid"></div>');
+    var dibujo = pyramidBuilder(exampleData2, '#pyramid', options);
+    }
+    function info_pob(){
+      
+    }
+  </script>
+<script src="/static/js/chart.min.js"></script>
+{% endblock %}
+

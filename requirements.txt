@@ -1,0 +1,9 @@
+flask
+pymongo
+bcrypt
+jsonify
+HTMLParser
+pandas
+docxtpl
+xlsxwriter
+world_bank_data

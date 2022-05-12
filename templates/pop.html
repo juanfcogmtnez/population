@@ -1,0 +1,221 @@
+{% extends "basedash.html" %}
+{% block title %}Register System{% endblock %}
+{% block menu %}
+{% if role == 'Admin' %}
+<li>hola</li>
+{% endif %}
+{% endblock %}
+{% block content %}
+<br>
+<center><h1>Proyección demográfica</h1></center>
+<br>
+<div class="container">
+  <div id="lienzo" class="row">
+    <div class="col-sm-5">
+      <div class="card">
+        <div class="card-body">
+  <div class="form-group"><label for="sel1">Selecciona país o zona geográfica:</label><select id="selcountry" class="form-control"></select></div>
+  <hr>
+  <div id="incanvas">
+  <canvas id="mylineChart"></canvas>
+  </div>
+  </div>
+  <hr>
+  <div id="info">
+  </div>
+</div>
+<hr>
+<button type="button" class="btn btn-primary btn-block" onclick="prev()">Enviar datos a prevalencia</button>
+</div>
+
+</div>
+<div id="cardpyramid" class="col-sm-7">
+  <div class="card">
+    <div class="card-body">
+        <canvas id="pyramid"></canvas>
+  <hr>
+  <center>
+  <label for="formControlRange">Año: <b><span id="añoselected">2022</span></b></label>
+  <input type="range" class="form-control-range" id="formControlRange" min="1960" max="2050" step="1" value="2022"  onchange="changeyear(this.value)">
+</center>
+  </div>
+  </div>
+  </div>
+  </div>
+  <script>
+    $(document).ready(function(){
+    $("#myModal").modal("show");
+      $.ajax({url: "/countries", success: function(result){
+  data = JSON.parse(result);
+  console.log(data);
+  longo = Object.keys(data).length;
+  console.log('longo:',longo);
+  for (let i = 0; i < longo; i++){
+  $("#selcountry").append('<option value="'+data[i]['codigos']+'">'+data[i]['paises']+'</option>');
+  }
+  $("#myModal").modal("hide");
+change();
+}});
+});
+  
+  </script>
+  <script>
+    function change(){
+  year = $("#añoselected").html();
+  if (!year){
+    $("#añoselected").html('2022');
+    year = '2022';
+  }
+  country = $("#selcountry").val();
+  if (!country){
+    $("#selcountry").val('ESP').change();
+    country = "ESP";
+  }
+  $.ajax({url: "/sel/"+country+"/"+year, success: function(result){
+    datos = JSON.parse(result.replace(/\bNaN\b/g, "null"));
+    console.log("pyramid:",datos);
+    rel(datos,year);
+  }});
+}
+    $('#selcountry').on('change', function() {
+change();
+graph();
+info_pob();
+});
+function rel(datos,year){
+    console.log("rel:",datos);
+    longo = Object.keys(datos).length;
+    labels = [];
+    females = [];
+    males = [];
+    for (let i = 0; i < longo; i++){
+        labels.unshift(datos[i]['age'])
+        f = [0]
+        f.push(datos[i]['female']*-1)
+        females.unshift(f)
+        m = [0]
+        m.push(datos[i]['male'])
+        males.unshift(m)
+    }
+    console.log("males:",males)
+      $("#cardpyramid").remove();
+      $("#lienzo").append('<div id="cardpyramid" class="col-sm-6">\
+  <div class="card">\
+    <div class="card-body">\
+  <canvas id="pyramid"></canvas>\
+  <hr>\
+  <center>\
+  <label for="formControlRange">Año: <b><span id="añoselected">'+year+'</span></b></label>\
+  <input type="range" class="form-control-range" id="formControlRange" min="1960" max="2050" step="1" value="'+year+'" onchange="changeyear(this.value)">\
+</center>\
+  </div>\
+  </div>\
+  </div>\
+  </div>');
+      var dibujo = document.getElementById('pyramid');
+      dibujo.height = 300;
+      const pyramid = new Chart(dibujo, {
+        type: 'bar',
+  data: {
+    labels: labels,
+    datasets: [{
+        label: 'Female',
+        data: females,
+        backgroundColor: 'pink',
+        barPercentage: 1,
+        categoryPercentage: 1,
+        borderColor: 'black',
+        borderWidth: 1
+      },
+      {
+        label: 'Male',
+        data: males,
+        backgroundColor: 'lightBlue',
+        barPercentage: 1,
+        categoryPercentage: 1,
+        borderColor: 'black',
+        borderWidth: 1,
+        borderSkipped: 'none' // Leave this line out to remove middle border at 0 line
+      }
+    ]
+  },
+  options: {
+    plugins: {
+      tooltip: {
+      }
+    },
+    indexAxis: 'y',
+    scales: {
+      y: {
+        stacked: true,
+        grid: {
+          display: false
+        }
+      },
+      x: {
+      }
+    }
+  }
+      })
+    }
+      function changeyear(e){
+        $("#añoselected").html(e);
+        change();
+        info_pob();
+    }
+        function graph(){
+           $("#mylineChart").remove();
+           $("#incanvas").append('<canvas id="mylineChart"></canvas>')
+           
+
+  
+          $.ajax({url: "/pop/"+country, success: function(result){
+            datos = JSON.parse(result.replace(/\bNaN\b/g, "null"));
+        console.log(datos);
+        labels = Object.keys(datos[0]);
+        labels.pop();
+        labels.pop();
+        labels.pop();
+        labels.pop();
+        labels.pop();
+        labels.pop();
+        console.log(labels);
+        data = [];
+        for (i=0;i<labels.length;i++){
+          data.push(datos[0][labels[i]]);
+        }
+        console.log(data);
+        const ctx = document.getElementById('mylineChart');
+        const mylineChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: '# Population',
+                data: data,
+                fill : false,
+                borderColor: [
+                'rgb(75, 192, 192)'
+                ],
+                tension:0.1
+            }]
+        },
+    });
+        }
+      });
+    }
+    function info_pob(){
+      year = $("#añoselected").html();
+      country = $("#selcountry").val();
+      $.ajax({url: "/pop_year/"+country+"/"+year, success: function(result){
+        infopob = JSON.parse(result.replace(/\bNaN\b/g, "null"));
+        console.log("infopob:",infopob);
+        $("#info").html('<h5>Población en '+country+ ' ('+year+') '+infopob+' habitantes</h5>');
+    }});
+  }
+  function prev(){
+      
+  }
+
+      </script>
+{% endblock %}

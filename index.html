@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D3 Population Pyramid</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s=" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="popPyramid.js">
+    </script>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <style>
+        body {
+            background-color: #f5f5f5;
+        }
+
+        .navbar-green {
+            background-color: #252;
+            color: white;
+            border: none;
+            box-shadow: rgba(0, 0, 0, 0.156863) 0px 3px 6px 0px, rgba(0, 0, 0, 0.227451) 0px 3px 6px 0px;
+        }
+
+        .navbar-green .navbar-toggle .icon-bar {
+            background-color: white;
+        }
+
+        .navbar-green a {
+            color: white;
+        }
+
+        .navbar-green a:hover,
+        .nav>li>a:focus, .nav>li>a:hover,
+        .navbar-green li.active {
+            background-color: #474 !important;
+        }
+
+        #brand:hover {
+            background-color: #252 !important;
+        }
+
+        #pyramid {
+            width: 600px;
+            height: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 100%;
+        }
+
+        .newSection {
+            padding-top: 70px;
+        }
+
+        .bodyContainer {
+            background-color: #fff;
+            border-left: 1px lightgray solid;
+            border-right: 1px lightgray solid;
+            margin-top: -25px;
+        }
+
+        .headerSection {
+            background-color: #7b7;
+            padding-bottom: 40px;
+            padding-top: 100px;
+        }
+        .headerSection h1 {
+            color: #050;
+            text-shadow: 2px 2px 2px #5a5;
+        }
+        .headerSection h2 {
+            color: #dfd;
+            font-size: 24px;
+        }
+
+        .mainTitle {
+            font-size: 50px;
+            font-weight: light;
+        }
+
+        .footer {
+            height: 250px;
+        }
+    </style>
+</head>
+
+<body data-spy="scroll" data-target="#navbar">
+    <nav class="navbar navbar-green navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" id="brand" href="#">D3-Population-Pyramid</a>
+            </div>
+            <div id="navbar" class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#example">Example</a></li>
+                    <li><a href="#options">Options</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="https://github.com/doylek/D3-Population-Pyramid">Download on GitHub</a></li>
+                </ul>
+            </div>
+            <!--/.nav-collapse -->
+        </div>
+    </nav>
+
+
+    <div class="container bodyContainer">
+      <div class="row headerSection">
+        <div class="col-md-8 col-md-offset-2">
+          <h1 class="mainTitle">D3-Population-Pyramid</h1>
+          <h2 class="">Niche js for a niche charting need</h2>
+        </div>
+      </div>
+        <div class="row newSection" id="about">
+            <div class="col-md-8 col-md-offset-2">
+              <h2 class="page-header">Why I made it</h2>
+                <p>
+                    I occasionally find myself needing to create population pyramids as a result of my work. All I've been able to find in the past has been hacks of Google Charts or Plotly or other popular charting libraries. I even tried creating
+                    some of these myself for chart.js! I got sick of trying to hack my way through someone else's work and decided to make my own javascript charting tool from 'scratch' using D3.
+                </p>
+                <p>And that's how D3-Population-Pyramid was born! </p>
+                <p>To use it, you'll need only popPyramid.min.js and D3 for your own implementation. The easiest use is to include this in your header:
+                </p>
+                <p>
+                    <code>
+                &lt;script src="https://d3js.org/d3.v4.min.js"&gt;&lt;/script&gt;
+                &lt;script src="popPyramid.min.js"&gt;&lt;/script&gt;
+                </code>
+                </p>
+                <p>And include something like this in your body:</p>
+                <p>
+                    <code>
+                &lt;script&gt;<br />
+                  // data must be in a format with age, male, and female in each object <br />
+                  var exampleData = [{ age: '0-9', male: 10, female: 12 }, { age: '10-19',
+                  male: 14, female: 15 }, { age: '20-29', male: 15, female: 18 },
+                  { age: '30-39', male: 18, female: 18 }, { age: '40-49', male: 21, female: 22 },
+                    {age: '50-59', male: 19, female: 24 }, { age: '60-69', male: 15, female: 14 },
+                    {age: '70-79', male: 8, female: 10 }, { age: '80-89', male: 4, female: 5 },
+                        {age: '90+', male: 2, female: 3 }]; <br /> <br />
+
+                        var options = {<br />
+                            &nbsp;&nbsp;height: 400,<br />
+                            &nbsp;&nbsp;width: 600,<br />
+                            &nbsp;&nbsp;style: {<br />
+                              &nbsp;&nbsp;&nbsp;&nbsp;leftBarColor: "#229922",<br />
+                                &nbsp;&nbsp;&nbsp;&nbsp;rightBarColor: "#992222"<br />
+                            &nbsp;&nbsp;}<br />
+                        }<br />
+                        pyramidBuilder(exampleData, '#pyramid', options);<br />
+                &lt;/script&gt;
+                </code>
+                </p>
+                </col-md-12>
+            </div>
+        </div>
+        <div class="row newSection" id="example">
+            <div class="col-md-8 col-md-offset-2">
+                <h2 class="page-header">Here's what it looks like</h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div id="pyramid">
+                </div>
+                <script>
+                    // data must be in a format with age, male, and female in each object
+                    var exampleData = [{
+                        age: "0-9",
+                        male: 10,
+                        female: 12
+                    }, {
+                        age: "10-19",
+                        male: 14,
+                        female: 15
+                    }, {
+                        age: "20-29",
+                        male: 15,
+                        female: 18
+                    }, {
+                        age: "30-39",
+                        male: 18,
+                        female: 18
+                    }, {
+                        age: "40-49",
+                        male: 21,
+                        female: 22
+                    }, {
+                        age: "50-59",
+                        male: 19,
+                        female: 24
+                    }, {
+                        age: "60-69",
+                        male: 15,
+                        female: 14
+                    }, {
+                        age: "70-79",
+                        male: 8,
+                        female: 10
+                    }, {
+                        age: "80-89",
+                        male: 4,
+                        female: 5
+                    }, {
+                        age: "90+",
+                        male: 2,
+                        female: 3
+                    }];
+                    var options = {
+                        height: 400,
+                        width: 600,
+                        style: {
+                            leftBarColor: "#229922",
+                            rightBarColor: "#992222"
+                        }
+                    }
+                    pyramidBuilder(exampleData, '#pyramid', options);
+                </script>
+            </div>
+        </div>
+        <div class="row newSection" id="options">
+            <div class="col-md-8 col-md-offset-2">
+                <h2 class="page-header"> Here's how you control its awesome power
+          </div>
+        </div>
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+              <div class="table-responsive">
+              <table class="table table-striped table-hover"><thead>
+              <tr>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Default</th>
+              <th>Optional</th>
+              <th>Notes</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+              <td>data</td>
+              <td>JSON</td>
+              <td>N/A</td>
+              <td>N</td>
+              <td>Needs age, male, and female properties. <br> Example: [{ age: &#39;0-50&#39;, male: 4500, female: 4500 }, { age: &#39;51-99+&#39;,male: 5000, female: 5000 }]</td>
+              </tr>
+              <tr>
+              <td>target</td>
+              <td>string</td>
+              <td>N/A</td>
+              <td>N</td>
+              <td>Uses D3&#39;s select() function. Examples: &#39;#pyramid&#39;, &#39;body&#39;</td>
+              </tr>
+              <tr>
+              <td>options</td>
+              <td>JSON</td>
+              <td>see below</td>
+              <td>N</td>
+              <td>If you want all defaults, you&#39;ll need to go with {} for this var</td>
+              </tr>
+              <tr>
+              <td>options.height</td>
+              <td>numeric</td>
+              <td>400</td>
+              <td>Y</td>
+              <td></td>
+              </tr>
+              <tr>
+              <td>options.width</td>
+              <td>numeric</td>
+              <td>400</td>
+              <td>Y</td>
+              <td></td>
+              </tr>
+              <tr>
+              <td>options.style</td>
+              <td>JSON</td>
+              <td>see below</td>
+              <td>Y</td>
+              <td>Example: {leftBarColor: &#39;#00ffaa&#39;, rightBarColor: &#39;#ffaa00&#39;, tooltipBG: &#39;#333&#39;, tooltipColor: &#39;white&#39;}</td>
+              </tr>
+              <tr>
+              <td>options.style.leftBarColor</td>
+              <td>string (hex)</td>
+              <td>&#39;#6c9dc6&#39;</td>
+              <td>Y</td>
+              <td>Input color will be automatically lightened for :hover css</td>
+              </tr>
+              <tr>
+              <td>options.style.rightBarColor</td>
+              <td>string (hex)</td>
+              <td>&#39;#de5454&#39;</td>
+              <td>Y</td>
+              <td>Input color will be automatically lightened for :hover css</td>
+              </tr>
+              <tr>
+              <td>options.style.tooltipBG</td>
+              <td>string (hex)</td>
+              <td>&#39;#fefefe&#39;</td>
+              <td>Y</td>
+              <td>Uses CSS background property, so you could use more than just a color value.</td>
+              </tr>
+              <tr>
+              <td>options.style.tooltipColor</td>
+              <td>string (hex)</td>
+              <td>&#39;black&#39;</td>
+              <td>Y</td>
+              <td>Controls CSS color property for tooltip</td>
+              </tr>
+              </tbody>
+            </table></div>
+            </div>
+        </div>
+        <div class="row newSection">
+          <div class="col-md-8 col-md-offset-2">
+            <h2 class="page-header">Like what you see?</h2>
+                <p><a href="https://github.com/doylek/D3-Population-Pyramid">Download D3 Population Pyramid from github and chart away!</a></p>
+            </div>
+        </div>
+        <div class="footer"></div>
+    </div>
+</body>
+
+</html>
